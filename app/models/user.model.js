@@ -15,6 +15,7 @@ const User = mongoose.model(
     password: String,
     publicKey: String,
     language: String,
+    managerID: String,
   })
 );
 module.exports = User;
