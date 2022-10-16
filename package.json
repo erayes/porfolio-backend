@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "Node.js + MongoDB: JWT Authentication & Authorization",
   "main": "index.js",
+  "engines": {
+    "node": "16.17.0"
+  },
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
