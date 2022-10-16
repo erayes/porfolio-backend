@@ -9,11 +9,11 @@ module.exports = function (app) {
     next();
   });
   app.post(
-    "api/auth/register",
+    "/api/auth/register",
     [verifyRegister.checkDuplicateMobileOrEmail],
     controller.register
   );
-  app.post("api/auth/login", controller.login);
+  app.post("/api/auth/login", controller.login);
 
-  app.post("api/auth/loginWithBiometrics", controller.loginWithBiometrics);
+  app.post("/api/auth/loginWithBiometrics", controller.loginWithBiometrics);
 };
