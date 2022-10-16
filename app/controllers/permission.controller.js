@@ -112,7 +112,7 @@ exports.cancel = (req, res) => {
       res.status(500).send({ message: "We have error" });
       return;
     } else if (!permission) {
-      res.status(400).send({ message: "Permission not found" });
+      res.status(400).send({ code: 400, message: "Permission not found" });
       return;
     } else {
       let message = "";
@@ -128,6 +128,7 @@ exports.cancel = (req, res) => {
         res.status(200).send({
           status: "fail",
           error: true,
+          data: permission,
           message,
         });
         return;
@@ -143,6 +144,56 @@ exports.cancel = (req, res) => {
               error: false,
               data: response,
               message: "Permission was canceled successfully",
+            });
+
+            return;
+          }
+        });
+      }
+    }
+  });
+};
+
+exports.updatePermission = (req, res) => {
+  var query = {
+    userID: req?.userId,
+    id: req.body.id,
+  };
+  Permission.findOne(query, (err, permission) => {
+    if (err) {
+      res.status(500).send({ message: "We have error" });
+      return;
+    } else if (!permission) {
+      res.status(400).send({ message: "Permission not found" });
+      return;
+    } else {
+      if (permission.state != "draft" && permission.state != "returned") {
+        res.status(200).send({
+          status: "fail",
+          error: true,
+          permission,
+          message: `You can not update ${permission.state} permission request`,
+        });
+        return;
+      } else {
+        if (permission.state === "returned") {
+          permission.state = "draft";
+        }
+        permission.reason = req.body.reason;
+        permission.type = req.body.type;
+        permission.startDate = req.body.startDate;
+        permission.endDate = req.body.endDate;
+
+        permission.save((err, response) => {
+          if (err) {
+            res.status(500).send({ message: "We have error" });
+            return;
+          } else {
+            res.status(200).send({
+              status: "success",
+              error: false,
+              data: response,
+              message: "Permission was updated successfully",
             });
             return;
           }
@@ -166,12 +217,9 @@ exports.updateState = (req, res) => {
       res.status(500).send({ message: "We have error" });
       return;
     } else if (!permission) {
-      res.status(400).send({ message: "Permission not found" });
+      res.status(400).send({ code: 4001, message: "Permission not found" });
       return;
     } else {
-      console.log("====================================");
-      console.log("permission ", permission);
-      console.log("====================================");
       let message = "";
 
       if (
@@ -198,6 +246,7 @@ exports.updateState = (req, res) => {
         res.status(200).send({
           status: "fail",
           error: true,
+          data: permission,
           message,
         });
         return;
@@ -208,8 +257,7 @@ exports.updateState = (req, res) => {
             permission.returnedReason = req.body.returnedReason;
           else {
             res.status(400).send({
-              status: "fail",
-              error: true,
+              code: 4003,
               message: "missed returned reason",
             });
             return;
@@ -220,7 +268,9 @@ exports.updateState = (req, res) => {
             res.status(500).send({ message: "We have error" });
             return;
           } else if (!response) {
-            res.status(400).send({ message: "Permission not found" });
+            res
+              .status(400)
+              .send({ code: 4004, message: "Permission not found" });
             return;
           } else {
             sendNotifications(

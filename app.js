@@ -40,17 +40,12 @@ app.listen(PORT, () => {
 });
 
 const db = require("./app/models");
-const dbConfig = require("./app/config/db.config.js");
 
 db.mongoose
-  .connect(
-    process.env.MONGODB_URI ||
-      `mongodb://${dbConfig.HOST}:${dbConfig.PORT}/${dbConfig.DB}`,
-    {
-      useNewUrlParser: true,
-      useUnifiedTopology: true,
-    }
-  )
+  .connect(process.env.DATABASE, {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+  })
   .then(() => {
     console.log("Successfully connect to MongoDB.");
   })
@@ -58,5 +53,3 @@ db.mongoose
     console.error("Connection error", err);
     process.exit();
   });
-
-module.exports = app;

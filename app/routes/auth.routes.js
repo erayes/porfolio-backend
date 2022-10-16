@@ -15,5 +15,5 @@ module.exports = function (app) {
   );
   app.post("/api/auth/login", controller.login);
 
-  app.post("/api/auth/login-with-biometrics", controller.loginWithBiometrics);
+  app.post("/api/auth/loginWithBiometrics", controller.loginWithBiometrics);
 };

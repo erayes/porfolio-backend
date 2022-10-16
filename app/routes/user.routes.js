@@ -10,13 +10,13 @@ module.exports = function (app) {
     next();
   });
   app.post(
-    "/api/test/enable-biometrics",
+    "/api/user/enableBiometrics",
     [authJwt.verifyToken],
     controller.enableBiometrics
   );
 
   app.post(
-    "/api/user/edit-avatar",
+    "/api/user/editAvatar",
     [authJwt.verifyToken],
     controller.editAvatar
   );

@@ -9,16 +9,17 @@ verifyToken = (req, res, next) => {
   console.log("token ", token);
   console.log("====================================");
   if (!token) {
-    return res.status(403).send({ message: "No token provided!" });
+    res.status(403).send({ message: "No token provided!" });
+    return;
   }
   jwt.verify(token, config.secret, (err, decoded) => {
     if (err) {
-      return res.status(401).send({ message: "Unauthorized!" });
+      res.status(401).send({ message: "Unauthorized!" });
+      return;
     }
     req.userId = decoded.id;
     console.log("decoded ==> ", decoded);
     // next();
-
     setTimeout(() => {
       // Delay this action by one second
       next();

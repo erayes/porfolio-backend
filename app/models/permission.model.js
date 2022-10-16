@@ -6,8 +6,11 @@ const Permission = mongoose.model(
     id: String,
     reason: String,
     type: {
-      en: String,
-      ar: String,
+      id: Number,
+      name: {
+        en: String,
+        ar: String,
+      },
     },
     startDate: String,
     endDate: String,

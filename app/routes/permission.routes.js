@@ -31,4 +31,10 @@ module.exports = function (app) {
     [authJwt.verifyToken],
     controller.updateState
   );
+
+  app.post(
+    "/api/permission/updatePermission",
+    [authJwt.verifyToken],
+    controller.updatePermission
+  );
 };

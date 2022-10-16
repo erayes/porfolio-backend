@@ -25,6 +25,7 @@ exports.enableBiometrics = (req, res) => {
       return res.status(200).send({
         status: "success",
         error: false,
+        message: "Biometrics was successfully enabled",
       });
     });
   });
@@ -89,12 +90,15 @@ exports.info = (req, res) => {
     if (err) {
       return res.status(500).send({ message: err });
     }
-
+    console.log("====================================");
+    console.log("user ", user);
+    console.log("====================================");
     console.log("====================================");
     console.log("language ", req.query.language);
     console.log("====================================");
-
-    user.language = req.query.language;
+    if (!user) {
+      return res.status(401).send({ message: "user not found" });
+    }
 
     user.save((error, user) => {
       if (error) {

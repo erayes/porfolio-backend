@@ -12,18 +12,19 @@ const { v4: uuidv4 } = require("uuid");
 exports.register = (req, res) => {
   const user = new User({
     id: uuidv4(),
-    englishName: req.body.englishName,
-    arabicName: req.body.arabicName,
+    englishName: req.body.englishName || "",
+    arabicName: req.body.arabicName || "",
     email: req.body.email,
     mobile: req.body.mobile,
-    avatar: req.body.avatar,
+    avatar: req.body.avatar || "",
     nationality: req.body.nationality,
-    gender: req.body.gender,
-    birthDate: req.body.birthDate,
-    fcmToken: req.body.fcmToken,
-    publicKey: req.body.publicKey,
+    gender: req.body.gender || "",
+    birthDate: req.body.birthDate || "",
+    fcmToken: req.body.fcmToken || "",
+    publicKey: req.body.publicKey || "",
     password: bcrypt.hashSync(req.body.password, 8),
-    language: req.body.language,
+    language: req.body.language || "",
+    managerID: req.body.managerID || "",
   });
 
   user.save((err, user) => {
