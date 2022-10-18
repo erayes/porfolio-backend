@@ -7,5 +7,6 @@ db.nationality = require("./nationality.model");
 db.nationality = require("./nationality.model");
 db.notification = require("./notification.model");
 db.permission = require("./permission.model");
+db.device = require("./device.model");
 
 module.exports = db;

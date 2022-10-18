@@ -17,7 +17,7 @@ exports.sendNotifications = (userIDs, title, body, type) => {
 
   User.find(
     {
-      id: {
+      _id: {
         $in: userIDs,
       },
       fcmToken: { $ne: null },
@@ -39,11 +39,11 @@ exports.sendNotifications = (userIDs, title, body, type) => {
           };
 
           const notification = {
-            id: uuidv4(),
+            _id: uuidv4(),
             title: title,
             body: body,
             type: type,
-            userID: element.id,
+            userID: element._id,
           };
 
           admin

@@ -1,7 +1,7 @@
 const mongoose = require("mongoose");
 
-const Nationality = mongoose.model(
-  "Nationality",
+const NotificationType = mongoose.model(
+  "NotificationType",
   new mongoose.Schema({
     _id: String,
     name: {
@@ -11,4 +11,4 @@ const Nationality = mongoose.model(
   })
 );
 
-module.exports = Nationality;
+module.exports = NotificationType;

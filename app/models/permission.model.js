@@ -3,10 +3,10 @@ const mongoose = require("mongoose");
 const Permission = mongoose.model(
   "Permission",
   new mongoose.Schema({
-    id: String,
+    _id: String,
     reason: String,
     type: {
-      id: Number,
+      _id: String,
       name: {
         en: String,
         ar: String,
@@ -14,8 +14,8 @@ const Permission = mongoose.model(
     },
     startDate: String,
     endDate: String,
-    userID: Object,
-    managerID: String,
+    userID: { type: mongoose.Schema.Types.String, ref: "User" },
+    managerID: { type: mongoose.Schema.Types.String, ref: "User" },
     state: String,
     returnedReason: String,
   })

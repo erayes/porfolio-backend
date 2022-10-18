@@ -19,7 +19,7 @@ exports.send = (req, res) => {
     },
   };
   const notification = {
-    id: uuidv4(),
+    _id: uuidv4(),
     title: req.body.title,
     body: req.body.body,
     type: req.body.type,
@@ -58,7 +58,7 @@ exports.getAllNotificationsByType = (req, res) => {
 };
 
 exports.deleteNotificationByID = (req, res) => {
-  var query = { userID: req?.userId, id: req.body.id };
+  var query = { userID: req?.userId, _id: req.body._id };
   Notification.deleteOne(query, function (err, obj) {
     if (err) return res.status(500).send({ message: "We have error" });
     return res.status(200).send({

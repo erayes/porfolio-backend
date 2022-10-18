@@ -13,7 +13,7 @@ exports.create = (req, res) => {
       ...data,
       state: "draft",
       userID: req?.userId,
-      id: uuidv4(),
+      _id: uuidv4(),
     },
     (err, response) => {
       if (err) {
@@ -54,58 +54,76 @@ exports.getAllUserPermissions = (req, res) => {
 exports.getAllManagerPermissions = (req, res) => {
   var query = { managerID: req?.userId, state: { $ne: "canceled" } };
   //..
-  Permission.aggregate([
-    {
-      $match: query,
-    },
-    {
-      $lookup: {
-        from: "users",
-        localField: "userID",
-        foreignField: "id",
-        as: "userInfo",
-      },
-    },
 
-    {
-      $unwind: "$userInfo",
-    },
-
-    {
-      $project: {
-        _id: 0,
-        id: 1,
-        reason: 1,
-        type: 1,
-        startDate: 1,
-        endDate: 1,
-        userID: 1,
-        managerID: 1,
-        state: 1,
-        returnedReason: 1,
-        userInfo: {
-          email: "$userInfo.email",
-          mobile: "$userInfo.mobile",
-          englishName: "$userInfo.englishName",
-          arabicName: "$userInfo.arabicName",
-        },
-      },
-    },
-  ])
-    .then((permissions) => {
-      console.log(permissions);
-      res.status(200).send({ permissions });
+  Permission.find(query)
+    .populate("userID", {
+      _id: 0,
+      email: 1,
+      mobile: 1,
+      englishName: 1,
+      arabicName: 1,
     })
-    .catch((error) => {
-      res.status(500).send({ message: "We have error" });
-      console.log(error);
+    .exec((err, permissions) => {
+      if (err) {
+        res.status(500).send({ message: "We have error" });
+        return;
+      }
+      res.status(200).send({ permissions });
+
+      return;
     });
+
+  // Permission.aggregate([
+  //   {
+  //     $match: query,
+  //   },
+  //   {
+  //     $lookup: {
+  //       from: "users",
+  //       localField: "userID",
+  //       foreignField: "_id",
+  //       as: "userInfo",
+  //     },
+  //   },
+
+  //   {
+  //     $unwind: "$userInfo",
+  //   },
+
+  //   {
+  //     $project: {
+  //       _id: 1,
+  //       reason: 1,
+  //       type: 1,
+  //       startDate: 1,
+  //       endDate: 1,
+  //       userID: 1,
+  //       managerID: 1,
+  //       state: 1,
+  //       returnedReason: 1,
+  //       userInfo: {
+  //         email: "$userInfo.email",
+  //         mobile: "$userInfo.mobile",
+  //         englishName: "$userInfo.englishName",
+  //         arabicName: "$userInfo.arabicName",
+  //       },
+  //     },
+  //   },
+  // ])
+  //   .then((permissions) => {
+  //     console.log(permissions);
+  //     res.status(200).send({ permissions });
+  //   })
+  //   .catch((error) => {
+  //     res.status(500).send({ message: "We have error" });
+  //     console.log(error);
+  //   });
 };
 
 exports.cancel = (req, res) => {
   var query = {
     userID: req?.userId,
-    id: req.body.id,
+    _id: req.body._id,
   };
   Permission.findOne(query, (err, permission) => {
     if (err) {
@@ -157,7 +175,7 @@ exports.cancel = (req, res) => {
 exports.updatePermission = (req, res) => {
   var query = {
     userID: req?.userId,
-    id: req.body.id,
+    _id: req.body._id,
   };
   Permission.findOne(query, (err, permission) => {
     if (err) {
@@ -208,7 +226,7 @@ exports.updateState = (req, res) => {
   console.log("managerID ", req?.userId);
   console.log("====================================");
 
-  var query = { managerID: req?.userId, id: req.body.id };
+  var query = { managerID: req?.userId, _id: req.body._id };
 
   const newState = req.body.state;
   Permission.findOne(query, (err, permission) => {

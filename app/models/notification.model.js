@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Notification = mongoose.model(
   "Notification",
   new mongoose.Schema({
-    id: String,
+    _id: String,
     title: {
       en: String,
       ar: String,
@@ -12,7 +12,7 @@ const Notification = mongoose.model(
       en: String,
       ar: String,
     },
-    userID: String,
+    userID: { type: mongoose.Schema.Types.String, ref: "User" },
     type: String,
   })
 );

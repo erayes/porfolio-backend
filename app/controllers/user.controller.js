@@ -4,7 +4,7 @@ const User = db.user;
 const Nationality = db.nationality;
 
 exports.enableBiometrics = (req, res) => {
-  User.findOne({ id: req?.userId }, (err, user) => {
+  User.findOne({ _id: req?.userId }, (err, user) => {
     if (err) {
       return res.status(500).send({ message: err });
     }
@@ -32,7 +32,7 @@ exports.enableBiometrics = (req, res) => {
 };
 
 exports.editAvatar = (req, res) => {
-  User.findOne({ id: req?.userId }, (err, user) => {
+  User.findOne({ _id: req?.userId }, (err, user) => {
     if (err) {
       return res.status(500).send({ message: err });
     }
@@ -59,7 +59,7 @@ exports.editAvatar = (req, res) => {
 };
 
 exports.updateFcmToken = (req, res) => {
-  User.findOne({ id: req?.userId }, (err, user) => {
+  User.findOne({ _id: req?.userId }, (err, user) => {
     if (err) {
       return res.status(500).send({ message: err });
     }
@@ -86,7 +86,7 @@ exports.updateFcmToken = (req, res) => {
 exports.info = (req, res) => {
   console.log("req ", req?.userId);
   // findByPk
-  User.findOne({ id: req?.userId }, (err, user) => {
+  User.findOne({ _id: req?.userId }, (err, user) => {
     if (err) {
       return res.status(500).send({ message: err });
     }
@@ -109,7 +109,7 @@ exports.info = (req, res) => {
       }
 
       const userInfo = {
-        id: user.id,
+        _id: user._id,
         arabicName: user.arabicName,
         englishName: user.englishName,
         language: user.language,
@@ -120,7 +120,7 @@ exports.info = (req, res) => {
         birthDate: user.birthDate,
         publicKey: user.publicKey,
       };
-      Nationality.findOne({ id: user.nationality }, (err, nationality) => {
+      Nationality.findOne({ _id: user.nationality }, (err, nationality) => {
         if (err || !nationality) {
           userInfo.nationality = null;
         }

@@ -7,15 +7,10 @@ const Nationality = db.nationality;
 exports.insertAllNationalities = (req, res) => {
   const nationalities = req.body.nationalities;
   nationalities.forEach((object) => {
-    // const nationality = new Nationality({
-    //   id: object.id,
-    //   name: object.name,
-    // });
-
     db.nationality.insertMany(
       {
-        ...object,
-        id: uuidv4(),
+        _id: uuidv4(),
+        name: object.name,
       },
       function (err, response) {
         if (err) {
