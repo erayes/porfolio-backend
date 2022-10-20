@@ -53,7 +53,6 @@ exports.getAllUserPermissions = (req, res) => {
 
 exports.getAllManagerPermissions = (req, res) => {
   var query = { managerID: req?.userId, state: { $ne: "canceled" } };
-  //..
 
   Permission.find(query)
     .populate("userID", {
@@ -72,52 +71,6 @@ exports.getAllManagerPermissions = (req, res) => {
 
       return;
     });
-
-  // Permission.aggregate([
-  //   {
-  //     $match: query,
-  //   },
-  //   {
-  //     $lookup: {
-  //       from: "users",
-  //       localField: "userID",
-  //       foreignField: "_id",
-  //       as: "userInfo",
-  //     },
-  //   },
-
-  //   {
-  //     $unwind: "$userInfo",
-  //   },
-
-  //   {
-  //     $project: {
-  //       _id: 1,
-  //       reason: 1,
-  //       type: 1,
-  //       startDate: 1,
-  //       endDate: 1,
-  //       userID: 1,
-  //       managerID: 1,
-  //       state: 1,
-  //       returnedReason: 1,
-  //       userInfo: {
-  //         email: "$userInfo.email",
-  //         mobile: "$userInfo.mobile",
-  //         englishName: "$userInfo.englishName",
-  //         arabicName: "$userInfo.arabicName",
-  //       },
-  //     },
-  //   },
-  // ])
-  //   .then((permissions) => {
-  //     console.log(permissions);
-  //     res.status(200).send({ permissions });
-  //   })
-  //   .catch((error) => {
-  //     res.status(500).send({ message: "We have error" });
-  //     console.log(error);
-  //   });
 };
 
 exports.cancel = (req, res) => {

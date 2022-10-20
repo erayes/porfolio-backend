@@ -42,7 +42,10 @@ exports.login = (req, res) => {
   User.findOne({
     email: req.body.email,
   })
-    .populate("nationality")
+    .populate("nationality", {
+      _id: 1,
+      name: 1,
+    })
     .exec((err, user) => {
       if (err) {
         return res.status(500).send({ message: err });
@@ -60,99 +63,79 @@ exports.login = (req, res) => {
           message: "Invalid Password!",
         });
       }
-      var token = jwt.sign({ _id: user._id }, config.secret, {
-        expiresIn: 86400, // 24 hours
-      });
 
-      const userInfo = {
-        _id: user._id,
-        arabicName: user.arabicName,
-        englishName: user.englishName,
-        language: req.body.language,
-        email: user.email,
-        mobile: user.mobile,
-        avatar: user.avatar,
-        gender: user.gender,
-        birthDate: user.birthDate,
-        publicKey: user.publicKey,
-        accessToken: token,
-        nationality: user.nationality,
-      };
+      Device.find(
+        { $or: [{ _id: req?.body?.deviceID }, { userID: user._id }] },
+        (error, devices) => {
+          console.log("====================================");
+          console.log("length ", devices?.length);
+          console.log("devices ", devices);
+          console.log("====================================");
+          if (error) {
+            return res.status(500).send({ message: error });
+          } else if (
+            devices?.length === 0 ||
+            (devices?.length === 1 &&
+              devices[0]?.userID === user._id &&
+              devices[0]?._id === req?.body?.deviceID)
+          ) {
+            const userInfo = {
+              _id: user._id,
+              arabicName: user.arabicName,
+              englishName: user.englishName,
+              language: req.body.language,
+              email: user.email,
+              mobile: user.mobile,
+              avatar: user.avatar,
+              gender: user.gender,
+              birthDate: user.birthDate,
+              publicKey: user.publicKey,
+              nationality: user.nationality,
+            };
 
-      const NewDevice = new Device({
-        _id: uuidv4(),
-        userID: user._id,
-      });
+            if (devices?.length === 0) {
+              const NewDevice = new Device({
+                _id: req?.body?.deviceID,
+                userID: user._id,
+              });
 
-      const createDevice = NewDevice.save();
-      user.language = req.body.language;
-      const saveUser = user.save();
+              const createDevice = NewDevice.save();
+              user.language = req.body.language;
+              const saveUser = user.save();
+              Promise.all([saveUser, createDevice]).then(([user, dev]) => {
+                console.log("user ", user);
+                console.log("dev ", dev);
 
-      Promise.all([saveUser, createDevice]).then(([user, dev]) => {
-        console.log("user ", user);
-        console.log("dev ", dev);
-        return res.status(200).send(userInfo);
-      });
-
-      // user.language = req.body.language;
-      // user.save((error, user) => {
-      //   if (error) {
-      //     return res.status(500).send({ message: error });
-      //   }
-      //   if (!user) {
-      //     return res.status(404).send({ message: "User Not found." });
-      //   }
-
-      //   Nationality.findOne({_id: user.nationality }, (err, nationality) => {
-      //     if (err || !nationality) {
-      //       userInfo.nationality = null;
-      //     }
-      //     userInfo.nationality = nationality;
-      //     return res.status(200).send(userInfo);
-      //   });
-      // });
-
-      // Device.find(
-      //   { $or: [{_id: req?.body?.deviceID }, { userID: user._id }] },
-      //   (error, devices) => {
-      //     console.log("====================================");
-      //     console.log("length ", devices?.length);
-      //     console.log("====================================");
-      //     if (error) {
-      //       return res.status(500).send({ message: error });
-      //     } else if (
-      //       devices?.length === 0 ||
-      //       (devices?.length === 1 &&
-      //         devices[0]?.userID === user._id &&
-      //         devices[0]?._id === req?.body?.deviceID)
-      //     ) {
-      //       const NewDevice = new Device({
-      //        _id: uuidv4(),
-      //         userID: user._id,
-      //       });
-
-      //       const createDevice = NewDevice.save();
-      //       user.language = req.body.language;
-      //       const saveUser = user.save();
-      //       const findNationality = Nationality.findOne({_id: user.nationality });
-
-      //       Promise.all([saveUser, findNationality, createDevice]).then(
-      //         ([user, nationality, dev]) => {
-      //           console.log("user ", user);
-      //           console.log("nationality ", nationality);
-      //           console.log("dev ", dev);
-      //         }
-      //       );
-
-      //       // add device and return normal
-      //       console.log("====================================");
-      //       console.log("Device id ", devices[0]._id);
-      //       console.log("====================================");
-      //     } else if (devices?.length > 1) {
-      //       //block user
-      //     }
-      //   }
-      // );
+                var token = jwt.sign(
+                  { _id: user._id, deviceID: dev?._id },
+                  config.secret,
+                  {
+                    expiresIn: 86400, // 24 hours
+                  }
+                );
+                userInfo.accessToken = token;
+                return res.status(200).send(userInfo);
+              });
+            } else {
+              var token = jwt.sign(
+                { _id: user._id, deviceID: devices[0]?._id },
+                config.secret,
+                {
+                  expiresIn: 86400, // 24 hours
+                }
+              );
+              userInfo.accessToken = token;
+              return res.status(200).send(userInfo);
+            }
+          } else {
+            return res.status(400).send({
+              code: 4001,
+              message:
+                "Device assigned to an other account or this account has an other device",
+            });
+          }
+        }
+      );
     });
 };
 
@@ -161,67 +144,72 @@ exports.loginWithBiometrics = (req, res) => {
   console.log("user id ", req.body._id);
   console.log("====================================");
 
-  User.findOne({ _id: req.body._id }, (error, user) => {
-    if (error) {
-      console.log("500");
-      return res.status(500).send({ message: "internal server error" });
-    }
-    if (!user) {
-      console.log("404");
-      return res.status(404).send({ message: "User Not found." });
-    }
-    try {
-      const decryptionKey = new NodeRSA(user.publicKey, "public");
-      decryptionKey.setOptions({ loginScheme: "sha256" });
-
-      const signature = Buffer.from(req.body.signature, "base64");
-      const message = Buffer.from(req.body._id, "utf8");
-      let result = decryptionKey.verify(message, signature);
-
-      if (!result) {
-        return res.status(404).send({
-          accessToken: null,
-          message: "Biometric Not Much",
-        });
+  User.findOne({ _id: req.body._id })
+    .populate("nationality", {
+      _id: 1,
+      name: 1,
+    })
+    .exec((error, user) => {
+      if (error) {
+        console.log("500");
+        return res.status(500).send({ message: "internal server error" });
       }
+      if (!user) {
+        console.log("404");
+        return res.status(404).send({ message: "User Not found." });
+      }
+      try {
+        const decryptionKey = new NodeRSA(user.publicKey, "public");
+        decryptionKey.setOptions({ loginScheme: "sha256" });
 
-      var token = jwt.sign({ _id: user._id }, config.secret, {
-        expiresIn: 86400, // 24 hours
-      });
+        const signature = Buffer.from(req.body.signature, "base64");
+        const message = Buffer.from(req.body._id, "utf8");
+        let result = decryptionKey.verify(message, signature);
 
-      user.language = req.body.language;
-      user.save((error, user) => {
-        if (error) {
-          return res.status(500).send({ message: error });
+        if (!result) {
+          return res.status(404).send({
+            accessToken: null,
+            message: "Biometric Not Much",
+          });
         }
-        if (!user) {
-          return res.status(404).send({ message: "User Not found." });
-        }
-        const userInfo = {
-          _id: user._id,
-          arabicName: user.arabicName,
-          englishName: user.englishName,
-          language: req.body.language,
-          email: user.email,
-          mobile: user.mobile,
-          avatar: user.avatar,
-          gender: user.gender,
-          birthDate: user.birthDate,
-          publicKey: user.publicKey,
-          accessToken: token,
-        };
-        Nationality.findOne({ _id: user.nationality }, (err, nationality) => {
-          if (err || !nationality) {
-            userInfo.nationality = null;
-          }
-          userInfo.nationality = nationality;
-          return res.status(200).send(userInfo);
+
+        var token = jwt.sign({ _id: user._id }, config.secret, {
+          expiresIn: 86400, // 24 hours
         });
-      });
-    } catch (we) {
-      return res.status(500).send({ message: "internal server error" });
-    }
-  });
+
+        user.language = req.body.language;
+        user.save((error, user) => {
+          if (error) {
+            return res.status(500).send({ message: error });
+          }
+          if (!user) {
+            return res.status(404).send({ message: "User Not found." });
+          }
+          const userInfo = {
+            _id: user._id,
+            arabicName: user.arabicName,
+            englishName: user.englishName,
+            language: req.body.language,
+            email: user.email,
+            mobile: user.mobile,
+            avatar: user.avatar,
+            gender: user.gender,
+            birthDate: user.birthDate,
+            publicKey: user.publicKey,
+            accessToken: token,
+          };
+          Nationality.findOne({ _id: user.nationality }, (err, nationality) => {
+            if (err || !nationality) {
+              userInfo.nationality = null;
+            }
+            userInfo.nationality = nationality;
+            return res.status(200).send(userInfo);
+          });
+        });
+      } catch (e) {
+        return res.status(500).send({ message: "internal server error" });
+      }
+    });
 };
 
 exports.logout = (req, res) => {

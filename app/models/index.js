@@ -9,4 +9,8 @@ db.notification = require("./notification.model");
 db.permission = require("./permission.model");
 db.device = require("./device.model");
 
+db.notificationType = require("./notification-type.model");
+db.permissionType = require("./permission-type.model");
+db.permissionState = require("./permission-state.model");
+
 module.exports = db;

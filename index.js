@@ -34,6 +34,10 @@ require("./app/routes/nationality.routes")(app);
 require("./app/routes/permission.routes")(app);
 require("./app/routes/twilio-sms.routes")(app);
 
+require("./app/routes/permissionState.routes")(app);
+require("./app/routes/permissionType.routes")(app);
+require("./app/routes/notificationType.routes")(app);
+
 // set port, listen for requests
 const PORT = process.env.PORT || 8080;
 app.listen(PORT, () => {
